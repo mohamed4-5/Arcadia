@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+body{
+  @apply bg-[#0a0f1f] text-white;
+}
+
+@layer utilities {
+  /* Pop animation */
+  @keyframes pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .animate-pop {
+    animation: pop 0.25s ease-out;
+  }
+
+  /* Glow effect */
+  .glow-x {
+    text-shadow: 0 0 12px rgba(0, 255, 255, 0.8), 0 0 22px rgba(0, 255, 255, 0.5);
+  }
+
+  .glow-o {
+    text-shadow: 0 0 12px rgba(255, 0, 180, 0.8), 0 0 22px rgba(255, 0, 180, 0.5);
+  }
+}
+
+@layer utilities {
+  /* Neon outline */
+  .neon {
+    position: relative;
+  }
+
+  .neon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    padding: 2px;
+    background: linear-gradient(
+      45deg,
+      #0ff,
+      #f0f,
+      #0ff
+    );
+    -webkit-mask: 
+      linear-gradient(#000 0 0) content-box, 
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0.3;
+    filter: blur(6px);
+    transition: 0.3s ease-in-out;
+  }
+
+  .neon:hover::after {
+    opacity: 0.8;
+    filter: blur(10px);
+  }
+}
