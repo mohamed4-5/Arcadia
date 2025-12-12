@@ -57,3 +57,60 @@ body{
     filter: blur(10px);
   }
 }
+
+@keyframes slide-bg {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes slide-bg {
+  0% { background-position: 0 0; }
+  100% { background-position: -200% 0; }
+}
+
+.fcai-moving-bg {
+  background-size: 200%;    /* حجم كويس لتكرار اللوجو */
+  background-repeat: repeat-x;
+  animation: slide-bg 6s linear infinite;
+}
+
+/* ==================================== */
+/* 1. تعريف Keyframes للـ Pop Effect */
+/* ==================================== */
+@keyframes pop-in {
+  0% {
+    transform: scale(0.5); /* يبدأ بحجم صغير جداً */
+    opacity: 0;           /* يكون غير مرئي */
+  }
+  80% {
+    transform: scale(1.05); /* يتجاوز الحجم الطبيعي قليلاً (لإعطاء إحساس الارتداد) */
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1); /* يستقر على الحجم الطبيعي */
+    opacity: 1;
+  }
+}
+
+/* ==================================== */
+/* 2. تعريف Utility Class لتطبيق الأنيميشن */
+/* ==================================== */
+
+.animate-letter-pop {
+  /* تطبيق Keyframes 'pop-in' */
+  animation-name: pop-in;
+  
+  /* مدة التشغيل */
+  animation-duration: 0.3s; 
+  
+  /* دالة التوقيت (لجعل الحركة تبدو طبيعية ومرحة) */
+  animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+  
+  /* التأكد من أن الحالة النهائية للـ Keyframes هي المعتمدة */
+  animation-fill-mode: forwards; 
+}
+
+/* ==================================== */
+/* ملاحظة: كلاس الـ glow-x و glow-o (اختياري، إذا كنت تريد تعريفهما أيضاً هنا) */
+/* ==================================== */
+/* إذا كان لديك glow-x/glow-o في CSS آخر، اتركه. وإلا، استخدم drop-shadow */

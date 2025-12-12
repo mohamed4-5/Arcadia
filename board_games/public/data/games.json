@@ -3,8 +3,12 @@
     "id": 1,
     "name": "XO",
     "image": "../games/xo.png",
-    "description": "لعبة كلاسيكية تعتمد على الذكاء السريع والمنافسة المباشرة.",
-    "players": "2 لاعبين",
-    "duration": "5 دقائق"
+    "description": "A classic game based on quick thinking and direct competition."
+  },
+  {
+    "id": 2,
+    "name": "SUS",
+    "image": "../games/SUS.jpg",
+    "description": "A new strategic challenge with a different twist, the goal is to collect the word S-U-S more"
   }
 ]

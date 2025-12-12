@@ -10,8 +10,9 @@ export default function Landing() {
                     bg-gradient-to-br from-[#0A0F1F] via-[#132A4C] to-[#1D4B73]
                     text-white">
     
-    <h1 className="text-5xl font-bold mb-4 tracking-wide">
-        FCAI Team
+    <h1 className="text-7xl font-extrabold bg-clip-text text-transparent fcai-moving-bg"
+    style={{backgroundImage: "url('/src/assets/logo.jpg')"}}>
+        FCAI
     </h1>
 
     <h2 className="text-2xl mb-8 opacity-80 text-center">

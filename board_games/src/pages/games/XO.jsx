@@ -5,6 +5,7 @@ export default function XO() {
   const [board, setBoard] = useState(Array(9).fill(""));
   const [turn, setTurn] = useState("X");
   const [winner, setWinner] = useState(null);
+  const [gameStatus, setGameStatus] = useState("playing"); // playing, finished
   const [mode, setMode] = useState("human"); // human or ai
   const [playerSymbol, setPlayerSymbol] = useState("X");
 
@@ -30,10 +31,19 @@ export default function XO() {
 
   const handleClick = (index) => {
     if (board[index] || winner || (mode === "ai" && turn !== playerSymbol)) return;
+    
     const newBoard = [...board];
     newBoard[index] = turn;
     setBoard(newBoard);
-    setTurn(turn === "X" ? "O" : "X");
+    
+    const nextTurn = turn === "X" ? "O" : "X";
+    setTurn(nextTurn);
+    
+    const result = checkWinner(newBoard);
+    if (result) {
+        setWinner(result);
+        setGameStatus("finished");
+    }
   };
 
   const minimax = (board, isMaximizing) => {
@@ -46,22 +56,22 @@ export default function XO() {
 
     if (isMaximizing) {
       let bestScore = -Infinity;
-      for (let i = 0; i < 9; i++) {
-        if (!board[i]) {
-          board[i] = aiSymbol;
+      for (let I = 0; I < 9; I++) {
+        if (!board[I]) {
+          board[I] = aiSymbol;
           const score = minimax(board, false);
-          board[i] = "";
+          board[I] = "";
           bestScore = Math.max(score, bestScore);
         }
       }
       return bestScore;
     } else {
       let bestScore = Infinity;
-      for (let i = 0; i < 9; i++) {
-        if (!board[i]) {
-          board[i] = playerSymbol;
+      for (let I = 0; I < 9; I++) {
+        if (!board[I]) {
+          board[I] = playerSymbol;
           const score = minimax(board, true);
-          board[i] = "";
+          board[I] = "";
           bestScore = Math.min(score, bestScore);
         }
       }
@@ -74,14 +84,14 @@ export default function XO() {
     let bestScore = -Infinity;
     let move = -1;
 
-    for (let i = 0; i < 9; i++) {
-      if (!board[i]) {
-        board[i] = aiSymbol;
+    for (let I = 0; I < 9; I++) {
+      if (!board[I]) {
+        board[I] = aiSymbol;
         let score = minimax(board, false);
-        board[i] = "";
+        board[I] = "";
         if (score > bestScore) {
           bestScore = score;
-          move = i;
+          move = I;
         }
       }
     }
@@ -93,27 +103,42 @@ export default function XO() {
     const result = checkWinner(board);
     if (result) {
       setWinner(result);
+      setGameStatus("finished");
       return;
     }
 
-    if (mode === "ai" && turn !== playerSymbol) {
+    if (mode === "ai" && turn !== playerSymbol && gameStatus === "playing") {
       const move = findBestMove();
       if (move !== -1) {
         const newBoard = [...board];
         newBoard[move] = turn;
         setTimeout(() => {
           setBoard(newBoard);
-          setTurn(turn === "X" ? "O" : "X");
+          const nextTurn = turn === "X" ? "O" : "X";
+          setTurn(nextTurn);
+          
+          const finalResult = checkWinner(newBoard);
+          if (finalResult) {
+              setWinner(finalResult);
+              setGameStatus("finished");
+          }
         }, 400);
       }
     }
-  }, [board, turn]);
+  }, [board, turn, mode, playerSymbol, gameStatus]);
 
   const resetGame = () => {
     setBoard(Array(9).fill(""));
     setWinner(null);
     setTurn("X");
+    setGameStatus("playing");
   };
+  
+  const handleModeChange = (newMode) => {
+      setMode(newMode);
+      resetGame(); 
+  };
+
 
   return (
     <PageWrapper>
@@ -128,7 +153,7 @@ export default function XO() {
         <div className="flex gap-4 mb-6">
           <select
             value={mode}
-            onChange={(e) => setMode(e.target.value)}
+            onChange={(e) => handleModeChange(e.target.value)} 
             className="bg-[#111827] px-4 py-2 rounded-xl cursor-pointer"
           >
             <option value="human">Human vs Human</option>
@@ -146,38 +171,52 @@ export default function XO() {
         </div>
 
         {/* Board */}
-        <div className="p-4 bg-[#0d1323] rounded-3xl shadow-xl">
+        <div className="p-4 bg-[#0d1323] rounded-3xl shadow-2xl border border-slate-800 mb-8">
           <div className="grid grid-cols-3 gap-3">
             {board.map((cell, index) => (
               <div
                 key={index}
                 onClick={() => handleClick(index)}
-                className=" w-24 h-24 bg-[#141a2e] shadow-inner rounded-2xl flex items-center justify-center text-4xl font-bold cursor-pointer hover:bg-[#1c2740] transition relative neon"
-              >
-                <span
                 className={`
-                    ${cell === "X" ? "text-cyan-400 glow-x" : ""}
-                    ${cell === "O" ? "text-pink-400 glow-o" : ""}
-                    animate-pop
+                    w-20 h-20 md:w-24 md:h-24 bg-[#141a2e] shadow-inner rounded-2xl flex items-center justify-center text-4xl font-bold cursor-pointer hover:bg-[#1c2740] transition relative neon
+                    ${!cell ? 'border-transparent hover:bg-[#1c2740] hover:border-slate-600' : 'border-[#1e293b]'}
                 `}
-                >
-                    {cell}
-                </span>
+              >
+                {cell && 
+                    <span 
+                        className={`  
+                            animate-letter-pop  
+                            ${cell === 'X' ? 'text-cyan-400 glow-x' : ''}  
+                            ${cell === 'O' ? 'text-pink-400 glow-o' : ''}  
+                        `}  
+                    >  
+                        {cell}  
+                    </span>
+                }
               </div>
             ))}
           </div>
         </div>
-         <button onClick={resetGame} className="mt-4 px-6 py-2 bg-purple-600 rounded-xl hover:bg-transparent border-2 border-transparent hover:border-purple-600 transition cursor-pointer duration-300">
-            Play Again
-        </button>
 
         {/* Winner */}
         {winner && (
-          <div className="mt-6 text-xl text-center">
+          <div className="text-2xl font-bold mb-3 text-white">
             {winner === "draw" ? <p>It's a draw 🤝</p> : <p>Winner: {winner} 🎉</p>}
           </div>
         )}
+        
+        {/* Reset/Play Again Button */}
+        <div className="flex items-center justify-center">
+          {gameStatus === "finished" ? 
+          <button onClick={resetGame} className="px-8 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.6)] transition transform hover:scale-105 active:scale-95 cursor-pointer">
+              Play Again
+          </button> : 
+          <button onClick={resetGame} className="text-slate-500 hover:text-white text-sm transition underline decoration-slate-700 underline-offset-4">
+              Reset Board
+          </button>} 
+       </div>
       </div>
+
     </PageWrapper>
   );
 }
