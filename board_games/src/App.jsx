@@ -4,6 +4,7 @@ import Landing from "./pages/Landing";
 import Games from "./pages/Games";
 import XO from "./pages/games/XO";
 import SUS from "./pages/games/SUS";
+import Shooter from "./pages/games/shooter/Shooter";
 
 export default function App() {
   const location = useLocation();
@@ -14,6 +15,7 @@ export default function App() {
       <Route path="games" element={<Games/>}/>
       <Route path="XO" element={<XO/>}/>
       <Route path="sus" element={<SUS/>}/>
+      <Route path="shooter" element={<Shooter/>}/>
     </Routes>
   </AnimatePresence>
 

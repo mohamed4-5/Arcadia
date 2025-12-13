@@ -114,3 +114,22 @@ body{
 /* ملاحظة: كلاس الـ glow-x و glow-o (اختياري، إذا كنت تريد تعريفهما أيضاً هنا) */
 /* ==================================== */
 /* إذا كان لديك glow-x/glow-o في CSS آخر، اتركه. وإلا، استخدم drop-shadow */
+
+.glow-enemy {
+  box-shadow:
+    0 0 10px #ec4899,
+    0 0 20px #ec4899;
+}
+
+.glow-player {
+  box-shadow:
+    0 0 10px #22d3ee,
+    0 0 20px #22d3ee,
+    0 0 40px #22d3ee;
+}
+
+.neon {
+  box-shadow:
+    0 0 15px rgba(34, 211, 238, 0.2),
+    inset 0 0 10px rgba(34, 211, 238, 0.15);
+}

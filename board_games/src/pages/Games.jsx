@@ -17,7 +17,7 @@ export default function Games() {
     <PageWrapper>
         <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-6">
         <h1 className="text-3xl font-bold text-white text-center mb-10">
-            الألعاب المتاحة
+            Available Games
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

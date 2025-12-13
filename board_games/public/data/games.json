@@ -3,12 +3,18 @@
     "id": 1,
     "name": "XO",
     "image": "../games/xo.png",
-    "description": "A classic game based on quick thinking and direct competition."
+    "description": "A classic game based on quick thinking and direct competition"
   },
   {
     "id": 2,
     "name": "SUS",
     "image": "../games/SUS.jpg",
     "description": "A new strategic challenge with a different twist, the goal is to collect the word S-U-S more"
+  },
+  {
+    "id": 3,
+    "name": "Shooter",
+    "image": "../games/shooter.jpg",
+    "description": "2D Shooter game, shoot enemeis coming from left and right"
   }
 ]
