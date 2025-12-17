@@ -67,7 +67,7 @@ export default function WhackMonster() {
 
         {/* Title */}
         <h1 className="text-4xl font-black mb-4 tracking-tighter bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">
-          WHACK A MONSTER
+          Whack Monster
         </h1>
 
         {/* HUD */}
