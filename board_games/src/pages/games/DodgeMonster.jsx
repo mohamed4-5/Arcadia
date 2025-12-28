@@ -3,14 +3,14 @@ import PageWrapper from "../../PageWrapper";
 import Robot from "../Robot";
 
 const BOARD_HEIGHT = 500;
-const PLAYER_WIDTH = 50;
-const PLAYER_HEIGHT = 40;
+const PLAYER_WIDTH = 45;
+const PLAYER_HEIGHT = 45;
 const MONSTER_SIZE = 45;
 const LANES = 6;
-const MONSTER_SPEED = 6;
+const MONSTER_SPEED = 7;
 const PLAYER_SPEED = 7; // سرعة موحدة وسلسة
 
-const BASE_SPAWN_TIME = 1000; // البداية (سهلة)
+const BASE_SPAWN_TIME = 900; // البداية (سهلة)
 const MIN_SPAWN_TIME = 300;  // الحد الأدنى (أقصى صعوبة)
 const SPAWN_REDUCE_RATE = 50; // كل سكورة تقل قد إيه
 
@@ -178,7 +178,7 @@ export default function DodgeMonsters() {
       <Robot mode={"game"} gameStatus={gameStatus} />
       <div className="min-h-screen bg-[#0f172a] flex flex-col items-center text-white touch-none select-none pt-10">
         <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-blue-400 to-pink-500 bg-clip-text text-transparent">
-          Dodge
+          Dodge Monsters
         </h1>
         <p className="mb-4 text-xl font-bold text-pink-400">Score: {score}</p>
 
@@ -190,7 +190,7 @@ export default function DodgeMonsters() {
           {/* Player - Using transform for performance */}
           <div
             ref={playerRef}
-            className="absolute bottom-4 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg shadow-lg"
+            className="absolute bottom-4 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full shadow-lg"
             style={{
               width: PLAYER_WIDTH,
               height: PLAYER_HEIGHT,

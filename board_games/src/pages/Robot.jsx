@@ -29,7 +29,7 @@ export default function Robot({
 
     if (gameStatus === "lose") {
       setState("lose");
-      setMessage("😂😂 Skill issue!");
+      setMessage("Skill issue! 😂😂");
     }
 
     if (gameStatus === "win") {
@@ -66,7 +66,7 @@ export default function Robot({
 >
       {/* Message */}
       {message && (
-        <div className="px-4 py-2 mb-3 bg-white text-black rounded-xl shadow text-sm font-semibold text-center animate-fade">
+        <div className={`px-4 py-2 mb-3 bg-white text-black rounded-xl shadow text-sm font-semibold text-center ${state === "idle" ? "animate-bounce" : "animate-fade"} `}>
           {message}
         </div>
       )}
@@ -100,7 +100,7 @@ export default function Robot({
         <img
           src="/games/robot.png"
           alt="Robot Idle"
-          className="w-full drop-shadow-lg"
+          className="w-full drop-shadow-lg animate-bounce"
         />
       )}
     </div>
