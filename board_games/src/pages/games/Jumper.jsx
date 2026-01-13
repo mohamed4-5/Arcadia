@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PageWrapper from "../../PageWrapper";
-import Robot from "../Robot";
+
 
 /* ================= CONSTANTS ================= */
 const WIDTH = 340;
@@ -12,7 +12,7 @@ const PLATFORM_W = 70;
 const PLATFORM_H = 14;
 
 /* ✅ LIMITS */
-const MAX_GAP = 130;     // أقصى مسافة بين البلاطات
+const MAX_GAP = 120;     // أقصى مسافة بين البلاطات
 const MIN_WIDTH = 65;   // أقل عرض للبلاطة
 
 const BASE_PLATFORM_SPEED = 1.2;
@@ -240,7 +240,7 @@ export default function PlatformerGame() {
 
   return (
     <PageWrapper>
-      <Robot mode="game" gameStatus={gameStatus} />
+      
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white p-4 select-none font-sans">
         
         {/* Header */}
@@ -295,7 +295,7 @@ export default function PlatformerGame() {
           {/* Game Over Screen */}
           {renderState.gameOver && (
             <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm animate-in fade-in duration-300">
-              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">CRASHED!</h2>
+              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">GAME OVER!</h2>
               <div className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">
                 SCORE: {renderState.score}m
               </div>

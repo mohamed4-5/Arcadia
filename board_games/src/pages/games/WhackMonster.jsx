@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PageWrapper from "../../PageWrapper";
-import Robot from "../Robot";
+
 
 export default function WhackMonster() {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -121,7 +121,7 @@ export default function WhackMonster() {
 
   return (
     <PageWrapper>
-      <Robot mode={"game"} gameStatus={gameStatus} />
+      
       <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex flex-col items-center pt-16 text-white select-none touch-none">
 
         {/* Title */}
@@ -151,11 +151,11 @@ export default function WhackMonster() {
         </div>
 
         {/* Board */}
-        <div className="relative grid grid-cols-3 gap-4 p-6 bg-[#0d1323] rounded-3xl shadow-xl neon pointer-events-none">
+        <div className="relative grid grid-cols-3 gap-4 p-6 bg-[#0d1323] rounded-3xl shadow-xl pointer-events-none">
           {Array.from({ length: 9 }).map((_, index) => (
             <div
               key={index}
-              className="w-24 h-24 bg-[#141a2e] rounded-2xl flex items-center justify-center"
+              className="w-24 h-24 bg-[#141a2e] neon rounded-2xl flex items-center justify-center"
             >
               {activeIndex === index && (
                 <div
@@ -177,12 +177,12 @@ export default function WhackMonster() {
           {/* Game Over Screen */}
           {gameOver && (
             <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm pointer-events-auto rounded-3xl">
-              <h2 className="text-3xl font-bold text-red-500 animate-bounce">GAME OVER!</h2>
-              <p className="text-2xl">Score: {score}</p>
+              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">GAME OVER!</h2>
+              <p className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">Score: {score}</p>
 
               <button
                 onClick={resetGame}
-                className="px-8 py-3 rounded-full cursor-pointer border-2 border-cyan-400 text-cyan-400 font-bold hover:bg-cyan-400 hover:text-black transition shadow-[0_0_15px_rgba(34,211,238,0.5)]"
+                className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]"
               >
                 Try Again
               </button>

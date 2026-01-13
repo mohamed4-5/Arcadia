@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import PageWrapper from "../../PageWrapper";
-import Robot from "../Robot";
+
 
 const BOARD_HEIGHT = 600;
 const MAX_SPEED = 10; // أقصى سرعة ممكنة
@@ -128,7 +128,7 @@ export default function PianoTiles() {
 
   return (
     <PageWrapper>
-      <Robot mode={"game"} gameStatus={gameStatus} />
+
       <div className="min-h-screen w-full bg-[#0f172a] flex flex-col items-center justify-center relative touch-none select-none overflow-hidden">
 
          {/* Title */}
@@ -189,21 +189,13 @@ export default function PianoTiles() {
 
           {/* Game Over Screen */}
           {gameOver && (
-            <div 
-              onPointerDown={(e) => e.stopPropagation()} // منع التفاعل مع البوردة أثناء القائمة
-              className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-md"
-            >
-              <h1 className="text-5xl font-bold text-red-500 animate-bounce">GAME OVER!</h1>
-              <div className="text-center">
-                <p className="text-white/60 text-sm">FINAL SCORE</p>
-                <p className="text-4xl text-white font-mono">{score}</p>
+            <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm animate-in fade-in duration-300">
+              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">GAME OVER!</h2>
+              <div className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">
+                SCORE: {score}
               </div>
-              
-              <button
-                onClick={resetGame}
-                className="px-9 py-3 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold text-lg hover:bg-cyan-400 hover:text-black transition-all shadow-[0_0_15px_rgba(34,211,238,0.5)] active:scale-95 cursor-pointer z-50"
-              >
-                Try Again
+              <button onClick={resetGame} className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                TRY AGAIN
               </button>
             </div>
           )}

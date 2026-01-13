@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import PageWrapper from "../../PageWrapper";
-import Robot from "../Robot";
+
 
 export default function Shooter() {
   const PLAYER_X = 260;
@@ -14,23 +14,24 @@ export default function Shooter() {
   const [enemySpeed, setEnemySpeed] = useState(4);
   const [spawnRate, setSpawnRate] = useState(1500);
 
-  const [level, setLevel] = useState(0); // ✅ مستوى الصعوبة
-
+  const [level, setLevel] = useState(0);
   const [canShoot, setCanShoot] = useState(true);
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameStatus, setGameStatus] = useState("playing");
 
-  /* ================= 🔫 SHOOT ================= */
+  /* ================= 🔫 SHOOT (رجع زي ما كان) ================= */
   const shoot = () => {
     if (!canShoot || isGameOver) return;
 
     setCanShoot(false);
+
     setShots((prev) => [
       ...prev,
       {
         id: Date.now(),
         x: PLAYER_X,
         dir: direction,
+        hit: false, // 👈 علشان نعرف خبط ولا لأ
       },
     ]);
 
@@ -57,20 +58,7 @@ export default function Shooter() {
 
     const interval = setInterval(() => {
       const side = Math.random() > 0.5 ? "left" : "right";
-      const rand = Math.random();
-
-      if (rand < 0.35) {
-        setEnemies((prev) => [
-          ...prev,
-          {
-            id: Date.now(),
-            side,
-            x: side === "left" ? 0 : 480,
-            hp: 2,
-          },
-        ]);
-        return;
-      }
+      const hard = Math.random() < 0.35;
 
       setEnemies((prev) => [
         ...prev,
@@ -78,7 +66,7 @@ export default function Shooter() {
           id: Date.now(),
           side,
           x: side === "left" ? 0 : 480,
-          hp: 1,
+          hp: hard ? 2 : 1,
         },
       ]);
     }, spawnRate);
@@ -102,7 +90,8 @@ export default function Shooter() {
     return () => clearInterval(interval);
   }, [enemySpeed, isGameOver]);
 
-  /* ================= 💥 MOVE SHOTS ================= */
+
+  /* ================= 💥 MOVE SHOTS + MISS PENALTY ================= */
   useEffect(() => {
     if (isGameOver) return;
 
@@ -113,7 +102,23 @@ export default function Shooter() {
             ...s,
             x: s.dir === "right" ? s.x + 12 : s.x - 12,
           }))
-          .filter((s) => s.x > 0 && s.x < 520)
+          .filter((s) => {
+            const out = s.x <= 0 || s.x >= 520;
+
+            if (out && !s.hit) {
+              // ❗ طلقة فلتت = خسارة قلب
+              setLives((l) => {
+                if (l - 1 <= 0) {
+                  setIsGameOver(true);
+                  setGameStatus("lose");
+                  return 0;
+                }
+                return l - 1;
+              });
+            }
+
+            return !out;
+          })
       );
     }, 40);
 
@@ -125,31 +130,35 @@ export default function Shooter() {
     if (isGameOver) return;
 
     const hits = [];
+
     shots.forEach((shot) => {
       const enemy = enemies.find((e) => Math.abs(shot.x - e.x) < 15);
-      if (enemy) {
-        hits.push({ shotId: shot.id, enemyId: enemy.id });
-      }
+      if (enemy) hits.push({ shotId: shot.id, enemyId: enemy.id });
     });
 
-    if (hits.length === 0) return;
+    if (!hits.length) return;
+
+    setShots((prev) =>
+      prev.map((s) =>
+        hits.find((h) => h.shotId === s.id) ? { ...s, hit: true } : s
+      )
+    );
 
     setEnemies((prev) =>
       prev
         .map((enemy) => {
-          const isHit = hits.find((h) => h.enemyId === enemy.id);
-          if (isHit) {
-            const newHp = enemy.hp - 1;
-            if (newHp <= 0) setScore((s) => s + 10);
-            return { ...enemy, hp: newHp };
-          }
-          return enemy;
+          const hit = hits.find((h) => h.enemyId === enemy.id);
+          if (!hit) return enemy;
+
+          const hp = enemy.hp - 1;
+          if (hp <= 0) setScore((s) => s + 10);
+          return { ...enemy, hp };
         })
         .filter((e) => e.hp > 0)
     );
 
     setShots((prev) =>
-      prev.filter((shot) => !hits.find((h) => h.shotId === shot.id))
+      prev.filter((s) => !hits.find((h) => h.shotId === s.id))
     );
   }, [shots, enemies, isGameOver]);
 
@@ -172,14 +181,13 @@ export default function Shooter() {
     });
   }, [enemies]);
 
-  /* ================= 🔥 DIFFICULTY (FIXED) ================= */
+  /* ================= 🔥 DIFFICULTY ================= */
   useEffect(() => {
     const newLevel = Math.floor(score / 25);
-
     if (newLevel > level) {
       setLevel(newLevel);
-      setEnemySpeed((s) => Math.min(s + 1, 8));   // 🔒 أقصى سرعة
-      setSpawnRate((r) => Math.max(r - 200, 600)); // 🔒 أقل Spawn
+      setEnemySpeed((s) => Math.min(s + 1, 8));
+      setSpawnRate((r) => Math.max(r - 200, 600));
     }
   }, [score]);
 
@@ -198,28 +206,39 @@ export default function Shooter() {
   };
 
   return (
-        <PageWrapper>
-          <Robot mode={"game"} gameStatus={gameStatus} />
-      {/* ⚙ Padding سفلي للشاشات الصغيرة لتجنب إخفاء الأزرار */}
-      <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex flex-col items-center justify-center relative overflow-hidden pb-40 sm:pb-0"> 
-        
-        {/* Title */}
-        <h1 className="text-5xl font-black mb-4 tracking-tighter bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">
+    <PageWrapper>
+     
+
+      <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex flex-col items-center justify-center relative overflow-hidden md:pb-10 pb-0">
+
+        <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-blue-400 to-pink-500 bg-clip-text text-transparent">
           Shooter
         </h1>
-        <div className="flex gap-20 mb-2 pointer-events-none">
-          {/* HUD */}
-          <div className=" text-cyan-400 text-xl font-bold z-10">
-            SCORE: {score}
-          </div>
 
-          <div className=" text-red-400 text-xl z-10 bg-transparent">
-            {"❤".repeat(lives)}
-          </div>
+        <div className="flex items-center gap-6 text-xl font-mono">
+             {/* SCORE (عرض ثابت) */}
+              <div className="w-[120px] text-left text-2xl text-pink-400">
+                Score: {score}
+              </div>
+
+              {/* HEARTS */}
+              <div className="flex gap-1">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className={`text-2xl text-red-500 drop-shadow-lg transition-all duration-300 ${
+                      i < lives
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-50"
+                    }`}
+                  >
+                    ❤
+                  </span>
+                ))}
+              </div>
         </div>
-        {/* GAME CARD */}
-        {/* ⚙ العرض 520px وتم تطبيق responsive scale-90 */}
-        <div className="relative w-[520px] h-[520px] mt-10 bg-[#0d1323] rounded-3xl border border-cyan-500/30 neon overflow-hidden transform scale-70 sm:scale-100 origin-center transition-transform">
+
+        <div className="relative w-[520px] h-[520px] mt-2 md:mt-10 bg-[#0d1323] rounded-3xl border border-cyan-500/30 overflow-hidden transform scale-70 sm:scale-100 origin-center transition-transform">
 
           {/* Player (استخدام clip-path) */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -232,20 +251,19 @@ export default function Shooter() {
             />
           </div>
 
-          {/* Enemies */}
+
+          {/* ENEMIES */}
           {enemies.map((e) => (
             <div
               key={e.id}
               className={`absolute top-1/2 -translate-y-1/2 rounded-full ${
-                e.hp === 2
-                  ? "w-12 h-12 bg-red-500"
-                  : "w-10 h-10 bg-pink-500"
+                e.hp === 2 ? "w-12 h-12 bg-red-500" : "w-10 h-10 bg-pink-500"
               }`}
               style={{ left: e.x }}
             />
           ))}
 
-          {/* Shots */}
+          {/* SHOTS */}
           {shots.map((s) => (
             <div
               key={s.id}
@@ -255,57 +273,51 @@ export default function Shooter() {
           ))}
 
           {isGameOver && (
-            <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm">
-              <h1 className="text-4xl font-bold text-red-500 tracking-wider animate-bounce">GAME OVER!</h1>
-              <p className="text-2xl text-white font-mono">Score: {score}</p>
-              
-              <button
-                onClick={resetGame}
-                className="px-8 py-3 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold text-lg hover:bg-cyan-400 hover:text-black transition-all shadow-[0_0_15px_rgba(34,211,238,0.5)] active:scale-95 cursor-pointer z-50"
-              >
-                Try Again
+            <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm animate-in fade-in duration-300">
+              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">GAME OVER!</h2>
+              <div className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">
+                SCORE: {score}
+              </div>
+              <button onClick={resetGame} className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                TRY AGAIN
               </button>
             </div>
           )}
+
         </div>
-        
-        
-        {/* ================= 🎮 MOBILE TOUCH CONTROLS ================= */}
+         {/* ================= 🎮 MOBILE TOUCH CONTROLS ================= */}
         {/* ⚙ تظهر فقط على الشاشات الأصغر من SM */}
-        <div className="sm:hidden fixed bottom-0 w-full flex justify-between items-center p-4 bg-[#0d1323]/50 backdrop-blur-sm z-30">
+        <div className="flex flex-row gap-5 justify-center w-full max-w-[340px] h-20 md:hidden">
             
-            {/* أزرار الاتجاهات (Left/Right) */}
-            <div className="flex gap-4">
-                <button
-                    onClick={() => setDirection("left")}
-                    className="w-16 h-16 bg-cyan-600/50 hover:bg-cyan-600 active:bg-cyan-700 text-white text-3xl rounded-full border border-cyan-400 flex items-center justify-center transition"
-                    aria-label="Move Left"
-                    disabled={isGameOver}
-                >
-                    &larr;
-                </button>
-                <button
-                    onClick={() => setDirection("right")}
-                    className="w-16 h-16 bg-cyan-600/50 hover:bg-cyan-600 active:bg-cyan-700 text-white text-3xl rounded-full border border-cyan-400 flex items-center justify-center transition"
-                    aria-label="Move Right"
-                    disabled={isGameOver}
-                >
-                    &rarr;
-                </button>
-            </div>
+            
+              <button
+                  onClick={() => setDirection("left")}
+                  className="flex-1  bg-white/10 rounded-xl text-3xl active:bg-white/30 touch-none"
+                  aria-label="Move Left"
+                  disabled={isGameOver}
+              >
+                  ⬅
+              </button>
+              
+              <button
+                  onClick={() => setDirection("right")}
+                  className="flex-1 bg-white/10 rounded-xl text-3xl active:bg-white/30 touch-none"
+                  aria-label="Move Right"
+                  disabled={isGameOver}
+              >
+                  ➡
+              </button>
 
             {/* زر إطلاق النار (Fire) */}
             <button
                 onClick={shoot}
-                className={`w-20 h-20 text-xl font-bold rounded-full border-4 border-red-500 transition 
-                ${canShoot && !isGameOver ? "bg-red-700/70 text-white shadow-red-500/50 shadow-lg active:bg-red-600" : "bg-gray-700/50 text-gray-500 cursor-not-allowed"}`}
+                className={`flex-[1.5] bg-red-500/50 rounded-xl text-3xl active:bg-red-500/80 border-2 border-red-500/20 touch-none`}
                 aria-label="Shoot"
                 disabled={!canShoot || isGameOver}
             >
-                FIRE
+                🔥
             </button>
         </div>
-
       </div>
     </PageWrapper>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PageWrapper from "../../PageWrapper";
-import Robot from "../Robot";
+
 
 const BOARD_HEIGHT = 500;
 const PLAYER_WIDTH = 45;
@@ -175,16 +175,16 @@ export default function DodgeMonsters() {
 
   return (
     <PageWrapper>
-      <Robot mode={"game"} gameStatus={gameStatus} />
+      
       <div className="min-h-screen bg-[#0f172a] flex flex-col items-center text-white touch-none select-none pt-10">
         <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-blue-400 to-pink-500 bg-clip-text text-transparent">
           Dodge Monsters
         </h1>
-        <p className="mb-4 text-xl font-bold text-pink-400">Score: {score}</p>
+        <p className="mb-4 text-2xl text-pink-400">Score: {score}</p>
 
         <div
           ref={boardRef}
-          className="relative w-full max-w-[340px] bg-black/30 border border-cyan-400/30 rounded-xl shadow-2xl neon overflow-hidden"
+          className="relative w-full max-w-[340px] bg-black/30 border border-cyan-400/30 rounded-xl shadow-2xl overflow-hidden"
           style={{ height: BOARD_HEIGHT }}
         >
           {/* Player - Using transform for performance */}
@@ -202,18 +202,17 @@ export default function DodgeMonsters() {
           <div ref={monstersContainerRef} className="absolute inset-0"/>
 
           {gameOver && (
-            <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm pointer-events-auto">
-              <h2 className="text-3xl font-bold text-red-500 animate-bounce">GAME OVER!</h2>
-              <p className="text-2xl">Score: {score}</p>
-
-              <button
-                onClick={resetGame}
-                className="px-8 py-3 rounded-full cursor-pointer border-2 border-cyan-400 text-cyan-400 font-bold hover:bg-cyan-400 hover:text-black transition shadow-[0_0_15px_rgba(34,211,238,0.5)]"
-              >
-                Try Again
+            <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm animate-in fade-in duration-300">
+              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">GAME OVER!</h2>
+              <div className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">
+                SCORE: {score}
+              </div>
+              <button onClick={resetGame} className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                TRY AGAIN
               </button>
             </div>
           )}
+        
         </div>
 
         {/* Mobile Controls */}

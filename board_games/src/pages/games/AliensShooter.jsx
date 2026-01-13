@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PageWrapper from "../../PageWrapper";
-import Robot from "../Robot";
+
 
 const WIDTH = 340;
 const HEIGHT = 500;
@@ -211,24 +211,37 @@ export default function AliensShooter() {
 
   return (
     <PageWrapper>
-      <Robot mode="game" gameStatus={gameStatus} />
+      
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white p-4 select-none font-sans">
         <h1 className="text-4xl font-black mb-4 tracking-tighter bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">Aliens Shooter</h1>
         
         <div className="flex flex-col items-center gap-2 mb-4">
-          <div className="flex gap-4 text-xl font-mono items-center">
-            <span>Score: {renderState.score}</span>
-            <div className="flex gap-1">
-              {Array.from({ length: renderState.lives }).map((_, i) => (
-                <span key={i} className="text-2xl text-red-500 drop-shadow-lg">❤</span>
+          <div className="flex items-center gap-6 text-xl font-mono">
+             {/* SCORE (عرض ثابت) */}
+              <div className="w-[120px] text-left text-2xl text-pink-400">
+                Score: {renderState.score}
+              </div>
+
+              {/* HEARTS */}
+              <div className="flex gap-1 text-red-500 text-2xl">
+              {[0, 1, 2].map((i) => (
+                <span
+                key={i}
+                className={`transition-all duration-300 ${
+                  i < renderState.lives ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                }`}
+              >
+                ❤
+              </span>
               ))}
             </div>
+
           </div>
 
           <div className="w-[200px] h-3 bg-white/10 rounded-full border border-white/20 overflow-hidden">
             <div 
               className={`h-full transition-all duration-75 ${isReloading ? 'bg-yellow-500 animate-pulse' : 'bg-cyan-400'}`} 
-              style={{ width: `${reloadProgress}%` }} 
+              style={{ width: `${reloadProgress}% `}} 
             />
           </div>
           <span className="text-xs font-bold text-cyan-200">{isReloading ? "RELOADING..." : `AMMO: ${ammo}/${MAX_AMMO}`}</span>
@@ -259,9 +272,14 @@ export default function AliensShooter() {
           ))}
 
           {renderState.gameOver && (
-            <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm">
-              <h2 className="text-3xl font-bold text-red-500 animate-bounce">GAME OVER!</h2>
-              <button onClick={reset} className="px-8 py-3 rounded-full border-2 border-cyan-400 text-cyan-400 font-bold hover:bg-cyan-400 hover:text-black transition active:scale-95">Try Again</button>
+            <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm animate-in fade-in duration-300">
+              <h2 className="text-5xl font-black text-white italic drop-shadow-[0_4px_0_rgba(0,0,0,1)]">GAME OVER!</h2>
+              <div className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">
+                SCORE: {renderState.score}
+              </div>
+              <button onClick={reset} className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                TRY AGAIN
+              </button>
             </div>
           )}
         </div>
