@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import logo from "../assets/logo.png"
 
 export default function SplashScreen({ onFinish }) {
   const [fade, setFade] = useState(false);
@@ -36,7 +37,7 @@ export default function SplashScreen({ onFinish }) {
            {/* <img src="/logo.png" className="w-40 h-40 object-contain" /> */}
            
            {/* أو نكتبها بتصميم نيون */}
-           <img src="../../public/logo.png" className="w-80 h-52" />
+           <img src={logo} alt="Arcadia Logo" className="w-80 h-52" />
         </div>
 
         {/* النص بتاع "من تطوير..." */}

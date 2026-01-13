@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../PageWrapper";
+import logo from "../assets/logo.jpg"
 
 
 export default function Landing() {
@@ -11,7 +12,7 @@ export default function Landing() {
                     bg-gradient-to-br from-[#0A0F1F] via-[#132A4C] to-[#1D4B73]
                     text-white">                
     <h1 className="text-7xl mb-16 font-extrabold text-center bg-clip-text text-transparent fcai-moving-bg"
-    style={{backgroundImage: "url('/src/assets/logo.jpg')"}}>
+    style={{backgroundImage: `url(${logo})`}}>
         Arcadia
     </h1>
 
