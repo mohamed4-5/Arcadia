@@ -220,7 +220,7 @@ export default function AliensShooter() {
         
         <div className="flex flex-col items-center gap-2 mb-4">
           <div className="flex items-center gap-6 text-xl font-mono">
-              <div className="w-[120px] text-left text-2xl text-pink-400 font-black">
+              <div className="w-[160px] text-left text-2xl text-pink-400 font-black">
                 Score: {renderState.score}
               </div>
 
