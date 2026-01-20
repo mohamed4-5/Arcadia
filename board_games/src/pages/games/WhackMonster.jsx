@@ -18,8 +18,8 @@ export default function WhackMonster() {
   const MAX_LEVEL = 10;
 
   // معادلات السرعة
-  const spawnSpeed = Math.max(500, 1200 - Math.min(level, MAX_LEVEL) * 60);
-  const hideSpeed = Math.max(350, 900 - Math.min(level, MAX_LEVEL) * 40);
+  const spawnSpeed = Math.max(500, 1200 - Math.min(level, MAX_LEVEL) * 50);
+  const hideSpeed = Math.max(350, 900 - Math.min(level, MAX_LEVEL) * 30);
 
   /* ================= 🔥 DIFFICULTY ================= */
   useEffect(() => {

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import PageWrapper from "../../PageWrapper";
-
 
 export default function Shooter() {
   const PLAYER_X = 260;
@@ -11,15 +10,27 @@ export default function Shooter() {
   const [lives, setLives] = useState(3);
 
   const [score, setScore] = useState(0);
-  const [enemySpeed, setEnemySpeed] = useState(4);
-  const [spawnRate, setSpawnRate] = useState(1500);
+  const [enemySpeed, setEnemySpeed] = useState(2); // 👈 أقل شوية
+  const [spawnRate, setSpawnRate] = useState(1000);
 
   const [level, setLevel] = useState(0);
   const [canShoot, setCanShoot] = useState(true);
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameStatus, setGameStatus] = useState("playing");
 
-  /* ================= 🔫 SHOOT (رجع زي ما كان) ================= */
+  const shotsRef = useRef([]);
+  const enemiesRef = useRef([]);
+
+  /* ================= SYNC REFS ================= */
+  useEffect(() => {
+    shotsRef.current = shots;
+  }, [shots]);
+
+  useEffect(() => {
+    enemiesRef.current = enemies;
+  }, [enemies]);
+
+  /* ================= 🔫 SHOOT ================= */
   const shoot = () => {
     if (!canShoot || isGameOver) return;
 
@@ -31,11 +42,12 @@ export default function Shooter() {
         id: Date.now(),
         x: PLAYER_X,
         dir: direction,
-        hit: false, // 👈 علشان نعرف خبط ولا لأ
+        hit: false,
       },
     ]);
 
-    setTimeout(() => setCanShoot(true), 250);
+    // 👇 cooldown أقل
+    setTimeout(() => setCanShoot(true), 150);
   };
 
   /* ================= 🎹 CONTROLS ================= */
@@ -74,28 +86,22 @@ export default function Shooter() {
     return () => clearInterval(interval);
   }, [spawnRate, isGameOver]);
 
-  /* ================= 🏃 MOVE ENEMIES ================= */
+  /* ================= 🎮 GAME LOOP (60 FPS) ================= */
   useEffect(() => {
     if (isGameOver) return;
 
-    const interval = setInterval(() => {
+    let animationId;
+
+    const loop = () => {
+      // MOVE ENEMIES
       setEnemies((prev) =>
         prev.map((e) => ({
           ...e,
           x: e.side === "left" ? e.x + enemySpeed : e.x - enemySpeed,
         }))
       );
-    }, 60);
 
-    return () => clearInterval(interval);
-  }, [enemySpeed, isGameOver]);
-
-
-  /* ================= 💥 MOVE SHOTS + MISS PENALTY ================= */
-  useEffect(() => {
-    if (isGameOver) return;
-
-    const interval = setInterval(() => {
+      // MOVE SHOTS
       setShots((prev) =>
         prev
           .map((s) => ({
@@ -106,7 +112,6 @@ export default function Shooter() {
             const out = s.x <= 0 || s.x >= 520;
 
             if (out && !s.hit) {
-              // ❗ طلقة فلتت = خسارة قلب
               setLives((l) => {
                 if (l - 1 <= 0) {
                   setIsGameOver(true);
@@ -120,10 +125,13 @@ export default function Shooter() {
             return !out;
           })
       );
-    }, 40);
 
-    return () => clearInterval(interval);
-  }, [isGameOver]);
+      animationId = requestAnimationFrame(loop);
+    };
+
+    animationId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationId);
+  }, [enemySpeed, isGameOver]);
 
   /* ================= 🎯 COLLISION ================= */
   useEffect(() => {
@@ -181,13 +189,14 @@ export default function Shooter() {
     });
   }, [enemies]);
 
-  /* ================= 🔥 DIFFICULTY ================= */
+  /* ================= 🔥 DIFFICULTY (LIMITED) ================= */
   useEffect(() => {
-    const newLevel = Math.floor(score / 25);
+    const newLevel = Math.floor(score / 30);
     if (newLevel > level) {
       setLevel(newLevel);
-      setEnemySpeed((s) => Math.min(s + 1, 8));
-      setSpawnRate((r) => Math.max(r - 200, 600));
+
+      setEnemySpeed((s) => Math.min(s + 0.5, 3)); // 👈 حد أقصى
+      setSpawnRate((r) => Math.max(r - 150, 600)); // 👈 حد أقصى
     }
   }, [score]);
 
@@ -198,8 +207,8 @@ export default function Shooter() {
     setEnemies([]);
     setLives(3);
     setScore(0);
-    setEnemySpeed(4);
-    setSpawnRate(1500);
+    setEnemySpeed(2);
+    setSpawnRate(1000);
     setLevel(0);
     setIsGameOver(false);
     setGameStatus("playing");
@@ -207,8 +216,6 @@ export default function Shooter() {
 
   return (
     <PageWrapper>
-     
-
       <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] flex flex-col items-center justify-center relative overflow-hidden md:pb-10 pb-0">
 
         <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-blue-400 to-pink-500 bg-clip-text text-transparent">
@@ -216,34 +223,29 @@ export default function Shooter() {
         </h1>
 
         <div className="flex items-center gap-6 text-xl font-mono">
-             {/* SCORE (عرض ثابت) */}
-              <div className="w-[120px] text-left text-2xl text-pink-400">
-                Score: {score}
-              </div>
+          <div className="w-[160px] text-left text-2xl text-pink-400">
+            Score: {score}
+          </div>
 
-              {/* HEARTS */}
-              <div className="flex gap-1">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className={`text-2xl text-red-500 drop-shadow-lg transition-all duration-300 ${
-                      i < lives
-                        ? "opacity-100 scale-100"
-                        : "opacity-0 scale-50"
-                    }`}
-                  >
-                    ❤
-                  </span>
-                ))}
-              </div>
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={`text-2xl text-red-500 transition-all ${
+                  i < lives ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                }`}
+              >
+                ❤
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="relative w-[520px] h-[520px] mt-2 md:mt-10 bg-[#0d1323] rounded-3xl border border-cyan-500/30 overflow-hidden transform scale-70 sm:scale-100 origin-center transition-transform">
+        <div className="relative w-[520px] h-[520px] md:mt-10 bg-[#0d1323] rounded-3xl border border-cyan-500/30 overflow-hidden transform scale-70 sm:scale-100">
 
-          {/* Player (استخدام clip-path) */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div
-              className={"w-14 h-14 bg-cyan-400 glow-player transition-transform duration-100"}
+              className="w-14 h-14 bg-cyan-400 shadow-[0_0_20px_#22d3ee] transition-transform duration-100"
               style={{
                 clipPath: 'polygon(0 50%, 100% 0, 100% 100%)',
                 transform: `rotate(${direction === "left" ? "0deg" : "180deg"})`
@@ -251,8 +253,6 @@ export default function Shooter() {
             />
           </div>
 
-
-          {/* ENEMIES */}
           {enemies.map((e) => (
             <div
               key={e.id}
@@ -263,7 +263,6 @@ export default function Shooter() {
             />
           ))}
 
-          {/* SHOTS */}
           {shots.map((s) => (
             <div
               key={s.id}
@@ -283,9 +282,8 @@ export default function Shooter() {
               </button>
             </div>
           )}
-
         </div>
-         {/* ================= 🎮 MOBILE TOUCH CONTROLS ================= */}
+        {/* ================= 🎮 MOBILE TOUCH CONTROLS ================= */}
         {/* ⚙ تظهر فقط على الشاشات الأصغر من SM */}
         <div className="flex flex-row gap-5 justify-center w-full max-w-[340px] h-20 md:hidden">
             
@@ -296,7 +294,7 @@ export default function Shooter() {
                   aria-label="Move Left"
                   disabled={isGameOver}
               >
-                  ⬅
+                  ←
               </button>
               
               <button
@@ -305,7 +303,7 @@ export default function Shooter() {
                   aria-label="Move Right"
                   disabled={isGameOver}
               >
-                  ➡
+                  →
               </button>
 
             {/* زر إطلاق النار (Fire) */}

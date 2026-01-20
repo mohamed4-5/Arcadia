@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import PageWrapper from "../../PageWrapper";
 
-
 const BOARD_HEIGHT = 600;
-const MAX_SPEED = 10; // أقصى سرعة ممكنة
+const MAX_SPEED = 10;
 
 export default function PianoTiles() {
   const [tiles, setTiles] = useState([]);
@@ -11,9 +10,11 @@ export default function PianoTiles() {
   const [speed, setSpeed] = useState(6);
   const [spawnRate, setSpawnRate] = useState(900);
   const [gameOver, setGameOver] = useState(false);
-  const [gameStatus, setGameStatus] = useState("playing");
 
-  /* ================= ⬇ تحريك الطوب ================= */
+  // مرجع (Ref) لمعرفة النتيجة داخل الـ Effects بدون إعادة تشغيلها
+  const scoreRef = useRef(0);
+
+  /* ================= ⬇ تحريك الطوب (أداء أفضل) ================= */
   useEffect(() => {
     if (gameOver) return;
 
@@ -48,17 +49,15 @@ export default function PianoTiles() {
     return () => clearInterval(interval);
   }, [spawnRate, gameOver]);
 
-  /* ================= 💀 شروط الخسارة (تجاوز الشاشة) ================= */
+  /* ================= 💀 شروط الخسارة ================= */
   useEffect(() => {
-    tiles.forEach((t) => {
-      if (t.y > BOARD_HEIGHT - 50) {
-        setGameOver(true);
-        setGameStatus("lose");
-      }
-    });
-  }, [tiles]);
+    const outOfBounds = tiles.some((t) => t.y > BOARD_HEIGHT - 50);
+    if (outOfBounds && !gameOver) {
+      setGameOver(true);
+    }
+  }, [tiles, gameOver]);
 
-  /* ================= 🔥 زيادة الصعوبة وتثبيت السرعة ================= */
+  /* ================= 🔥 زيادة الصعوبة ================= */
   useEffect(() => {
     if (score > 0 && score % 10 === 0) {
       setSpeed((s) => Math.min(s + 0.6, MAX_SPEED));
@@ -66,17 +65,11 @@ export default function PianoTiles() {
     }
   }, [score]);
 
-  /* ================= ✅ الضغط الصحيح على الطوبة ================= */
+  /* ================= ✅ الضغط الصحيح ================= */
   const hitTile = (id) => {
     if (gameOver) return;
-
-    setTiles((prev) => {
-      const exists = prev.find((t) => t.id === id);
-      if (!exists) return prev;
-
-      setScore((s) => s + 1);
-      return prev.filter((t) => t.id !== id);
-    });
+    setScore((s) => s + 1);
+    setTiles((prev) => prev.filter((t) => t.id !== id));
   };
 
   /* ================= ⌨ التحكم بالكيبورد ================= */
@@ -89,9 +82,7 @@ export default function PianoTiles() {
         .sort((a, b) => b.y - a.y);
 
       if (columnTiles.length === 0) {
-        // لو داس كيبورد ومفيش طوبة في العمود ده يخسر
         setGameOver(true);
-        setGameStatus("lose");
         return prev;
       }
       
@@ -106,47 +97,51 @@ export default function PianoTiles() {
     const handleKeyDown = (e) => {
       if (e.repeat || gameOver) return;
       const key = e.key.toLowerCase();
-      if (key === "a") hitColumn(0);
-      if (key === "s") hitColumn(1);
-      if (key === "k") hitColumn(2);
-      if (key === "l") hitColumn(3);
+      const keys = { a: 0, s: 1, k: 2, l: 3 };
+      if (keys[key] !== undefined) hitColumn(keys[key]);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameOver, tiles]); // أضفت tiles لضمان دقة الكيبورد
+  }, [gameOver, tiles]);
 
-  /* ================= 🔄 إعادة اللعب ================= */
   const resetGame = () => {
     setTiles([]);
     setScore(0);
-    setSpeed(6); // القيمة الابتدائية عند الريستارت
+    setSpeed(6);
     setSpawnRate(900);
     setGameOver(false);
-    setGameStatus("playing");
   };
 
   return (
     <PageWrapper>
+      {/* ستايل إضافي لمنع أي تهنيج بسبب اللمس المطول */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .no-select {
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+      `}} />
 
-      <div className="min-h-screen w-full bg-[#0f172a] flex flex-col items-center justify-center relative touch-none select-none overflow-hidden">
-
-         {/* Title */}
+      <div 
+        onContextMenu={(e) => e.preventDefault()} // منع القائمة عند الضغط المطول
+        className="no-select min-h-screen w-full bg-[#0f172a] flex flex-col items-center justify-center relative touch-none overflow-hidden"
+      >
         <h1 className="text-5xl font-black mb-4 tracking-tighter bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">
           Piano
         </h1>
         
-        <div className=" text-cyan-400 text-xl font-bold z-10 mb-4">
+        <div className="text-cyan-400 text-xl font-bold z-10 mb-4">
           SCORE: {score}
         </div>
 
-        {/* Board Container */}
         <div
-          // 🛑 الخسارة عند الضغط في أي مكان فاضي بالبوردة
-          onPointerDown={() => {
+          onPointerDown={(e) => {
             if (!gameOver) setGameOver(true);
           }}
-          className="relative rounded-xl overflow-hidden border-2 border-white/10 shadow-2xl bg-black/40 cursor-pointer"
+          className="relative rounded-xl overflow-hidden border-2 border-white/10 shadow-2xl bg-black/40"
           style={{ 
             height: BOARD_HEIGHT, 
             width: '100%', 
@@ -186,7 +181,6 @@ export default function PianoTiles() {
                 <div className="w-full h-full rounded-lg bg-gradient-to-b from-cyan-400 to-blue-600 shadow-[0_0_15px_rgba(34,211,238,0.4)] border border-white/20 active:brightness-125 transition-all"></div>
             </div>
           ))}
-
           {/* Game Over Screen */}
           {gameOver && (
             <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-6 z-50 backdrop-blur-sm animate-in fade-in duration-300">
@@ -194,13 +188,18 @@ export default function PianoTiles() {
               <div className="text-xl font-mono text-cyan-400 font-bold bg-slate-800/50 px-4 py-2 rounded-lg">
                 SCORE: {score}
               </div>
-              <button onClick={resetGame} className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+              <button 
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  resetGame();
+                }} 
+                className="px-10 py-4 cursor-pointer bg-yellow-400 text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.4)]"
+              >
                 TRY AGAIN
               </button>
             </div>
           )}
         </div>
-
       </div>
     </PageWrapper>
   );

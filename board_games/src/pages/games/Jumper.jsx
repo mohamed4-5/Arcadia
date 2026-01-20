@@ -1,30 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import PageWrapper from "../../PageWrapper";
 
-
 /* ================= CONSTANTS ================= */
 const WIDTH = 340;
 const HEIGHT = 500;
 const PLAYER_SIZE = 40;
 const GRAVITY = 0.5;
 const JUMP_FORCE = -12;
-const PLATFORM_W = 70;
+const PLATFORM_W = 75;
 const PLATFORM_H = 14;
 
 /* ✅ LIMITS */
-const MAX_GAP = 120;     // أقصى مسافة بين البلاطات
-const MIN_WIDTH = 65;   // أقل عرض للبلاطة
+const MAX_GAP = 120;
+const MIN_WIDTH = 70;
 
 const BASE_PLATFORM_SPEED = 1.2;
 const MAX_PLATFORM_SPEED = 3;
+
+// ✅ هدفنا نثبت اللعبة على 60 فريم في الثانية
+const TARGET_FPS = 60;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
 export default function PlatformerGame() {
   const animationRef = useRef(null);
   const [gameStatus, setGameStatus] = useState("playing");
   
-  // نستخدم Refs للإدخال والحسابات الفيزيائية لتجنب إعادة الرندر
+  // Refs للإدخال
   const keys = useRef({});
   
+  // ✅ Ref جديد علشان نحسب الوقت ونظبط السرعة
+  const timeRef = useRef({
+    lastFrameTime: 0,
+  });
+
   const physics = useRef({
     x: WIDTH / 2 - PLAYER_SIZE / 2,
     y: HEIGHT - 150,
@@ -35,7 +43,6 @@ export default function PlatformerGame() {
     gameOver: false,
   });
 
-  // State للرندر فقط (يحتوي على القيم النهائية للعرض)
   const [renderState, setRenderState] = useState({
     playerX: WIDTH / 2 - PLAYER_SIZE / 2,
     playerY: HEIGHT - 150,
@@ -45,7 +52,6 @@ export default function PlatformerGame() {
     gameOver: false,
   });
 
-  // دالة إنشاء المنصات مع معرفات فريدة (Unique IDs) لمنع اللاج
   const createPlatform = (y, id) => {
     return {
       x: Math.random() * (WIDTH - PLATFORM_W),
@@ -59,10 +65,8 @@ export default function PlatformerGame() {
 
   const initGame = () => {
     const plats = [];
-    // منصة البداية
     plats.push({ x: WIDTH / 2 - PLATFORM_W / 2, y: HEIGHT - 60, w: PLATFORM_W, type: 'static', id: 'start' });
     
-    // توليد منصات أولية
     for (let i = 1; i < 7; i++) {
       plats.push(createPlatform(HEIGHT - 60 - (i * 90), `init-${i}`));
     }
@@ -76,6 +80,9 @@ export default function PlatformerGame() {
       score: 0,
       gameOver: false,
     };
+    
+    // تصفير وقت الفريم
+    timeRef.current.lastFrameTime = 0;
   };
 
   useEffect(() => {
@@ -84,9 +91,6 @@ export default function PlatformerGame() {
     const down = (e) => (keys.current[e.key] = true);
     const up = (e) => (keys.current[e.key] = false);
     
-    const touchStart = (key) => (keys.current[key] = true);
-    const touchEnd = (key) => (keys.current[key] = false);
-
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     
@@ -99,14 +103,35 @@ export default function PlatformerGame() {
   const startGameLoop = () => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
-    const update = () => {
+    // ✅ التغيير هنا: الدالة بقت تستقبل الـ timestamp
+    const update = (timestamp) => {
+      // لو دي أول مرة، احفظ الوقت الحالي
+      if (!timeRef.current.lastFrameTime) {
+        timeRef.current.lastFrameTime = timestamp;
+      }
+
+      // احسب الوقت اللي مر من آخر فريم
+      const elapsed = timestamp - timeRef.current.lastFrameTime;
+
+      // ✅ لو الوقت اللي مر أقل من المعدل المطلوب (يعني الشاشة سريعة زيادة)،
+      // ما تعملش حاجة واستنى الفريم اللي بعده
+      if (elapsed < FRAME_INTERVAL) {
+        animationRef.current = requestAnimationFrame(update);
+        return;
+      }
+
+      // ✅ نظبط الوقت للفريم الجديد (مع مراعاة الكسر عشان الحركة تبقى ناعمة)
+      timeRef.current.lastFrameTime = timestamp - (elapsed % FRAME_INTERVAL);
+
       const p = physics.current;
       
       if (p.gameOver) {
         return;
       }
 
-      // 1. حساب الدوران والحركة الأفقية
+      // --- منطق اللعبة زي ما هو بالضبط ---
+      
+      // 1. حساب الحركة
       let currentRotation = 0;
       if (keys.current["ArrowLeft"]) {
         p.vx = -6;
@@ -115,13 +140,12 @@ export default function PlatformerGame() {
         p.vx = 6;
         currentRotation = 10;
       } else {
-        p.vx *= 0.8; // Friction
+        p.vx *= 0.8; 
         currentRotation = 0;
       }
 
       p.x += p.vx;
 
-      // Wrap-around
       if (p.x > WIDTH) p.x = -PLAYER_SIZE;
       if (p.x < -PLAYER_SIZE) p.x = WIDTH;
 
@@ -129,16 +153,15 @@ export default function PlatformerGame() {
       p.vy += GRAVITY;
       p.y += p.vy;
 
-      // 3. منطق الكاميرا (Scrolling)
+      // 3. الكاميرا
       if (p.y < HEIGHT / 2) {
         const offset = (HEIGHT / 2) - p.y;
         p.y = HEIGHT / 2;
         p.score += offset; 
-        
         p.platforms.forEach(plat => plat.y += offset);
       }
 
-      // 4. التصادم (Collision)
+      // 4. التصادم
       if (p.vy > 0) {
         p.platforms.forEach(plat => {
           if (
@@ -152,8 +175,8 @@ export default function PlatformerGame() {
         });
       }
 
-      // 5. إدارة المنصات (إضافة وحذف)
-      p.platforms = p.platforms.filter(plat => plat.y < HEIGHT); // حذف ما خرج من الشاشة
+      // 5. إدارة المنصات
+      p.platforms = p.platforms.filter(plat => plat.y < HEIGHT);
 
       const realScore = Math.floor(p.score / 10);
       const difficulty = Math.min(realScore / 500, 1);
@@ -161,18 +184,13 @@ export default function PlatformerGame() {
       while (p.platforms.length < 7) {
         const lastPlat = p.platforms[p.platforms.length - 1];
         
-                /* ✅ FIXED GAP & WIDTH */
         const rawGap = 90 + difficulty * 70;
         const gap = Math.min(rawGap, MAX_GAP);
 
         const rawWidth = PLATFORM_W - difficulty * 25;
         const w = Math.max(rawWidth, MIN_WIDTH);
-
         
-        // --- التعديل هنا: منع المنصات المتحركة المتتالية ---
         let isMoving = false;
-        
-        // فقط لو المنصة السابقة كانت ثابتة، نفكر نعمل دي متحركة
         if (lastPlat.type !== 'moving') {
             isMoving = realScore > 100 && Math.random() < (0.3 + difficulty * 0.4);
         }
@@ -189,17 +207,15 @@ export default function PlatformerGame() {
         p.platforms.push(newPlat);
       }
 
-      // تحريك المنصات المتحركة
       p.platforms.forEach(plat => {
         if (plat.type === 'moving') {
           const speed = BASE_PLATFORM_SPEED + difficulty * (MAX_PLATFORM_SPEED - BASE_PLATFORM_SPEED);
-
           plat.x += plat.dir * speed;
           if (plat.x <= 0 || plat.x >= WIDTH - plat.w) plat.dir *= -1;
         }
       });
 
-      // 6. التحقق من الخسارة
+      // 6. الخسارة
       if (p.y > HEIGHT) {
         p.gameOver = true;
         setGameStatus("lose");
@@ -207,7 +223,7 @@ export default function PlatformerGame() {
         return;
       }
 
-      // 7. تحديث الرندر
+      // 7. الرندر
       setRenderState({
         playerX: p.x,
         playerY: p.y,
@@ -240,7 +256,6 @@ export default function PlatformerGame() {
 
   return (
     <PageWrapper>
-      
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white p-4 select-none font-sans">
         
         {/* Header */}
@@ -313,13 +328,13 @@ export default function PlatformerGame() {
             onPointerUp={() => handleTouchEnd("ArrowLeft")}
             onPointerLeave={() => handleTouchEnd("ArrowLeft")}
             className="flex-1 bg-slate-800 rounded-2xl text-4xl active:bg-slate-700 touch-none border-b-4 border-slate-950 flex items-center justify-center shadow-lg text-white"
-          >⬅</button>
+          >←</button>
           <button 
             onPointerDown={() => handleTouchStart("ArrowRight")} 
             onPointerUp={() => handleTouchEnd("ArrowRight")} 
             onPointerLeave={() => handleTouchEnd("ArrowRight")}
             className="flex-1 bg-slate-800 rounded-2xl text-4xl active:bg-slate-700 touch-none border-b-4 border-slate-950 flex items-center justify-center shadow-lg text-white"
-          >➡</button>
+          >→</button>
         </div>
       </div>
     </PageWrapper>

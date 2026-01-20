@@ -15,6 +15,7 @@ import { useState } from "react";
 // 👇👇 استدعاء ملف الاسبلاش سكرين (تأكد ان المسار صح)
 import SplashScreen from "./pages/SplashScreen";
 
+
 export default function App() {
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);

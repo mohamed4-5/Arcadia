@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import PageWrapper from "../../PageWrapper";
 
-
+/* ================= CONSTANTS ================= */
 const WIDTH = 340;
 const HEIGHT = 500;
 const PLAYER_W = 40;
@@ -16,9 +16,13 @@ const MAX_AMMO = 8;
 const RELOAD_TIME = 1200;
 const HEART_DROP_TIME = 20000;
 const BASE_ENEMY_SPEED = 3;
-const MAX_ENEMY_SPEED = 4;
+const MAX_ENEMY_SPEED = 3;
 const BASE_ENEMY_FIRE_RATE = 900;
 const MIN_ENEMY_FIRE_RATE = 400;
+
+// ✅ FPS CONFIG
+const TARGET_FPS = 60;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
 export default function AliensShooter() {
   const animationRef = useRef(null);
@@ -26,6 +30,9 @@ export default function AliensShooter() {
   const lastEnemyShotRef = useRef(0);
   const lastHeartRef = useRef(0);
   const reloadIntervalRef = useRef(null);
+  
+  // ✅ Ref لحساب الوقت ومنع تسارع الموبايل
+  const timeRef = useRef({ lastFrameTime: 0 });
 
   const [ammo, setAmmo] = useState(MAX_AMMO);
   const [isReloading, setIsReloading] = useState(false);
@@ -57,7 +64,7 @@ export default function AliensShooter() {
     };
   }, []);
 
-    const handleTouchStart = (key) => (keys.current[key] = true);
+  const handleTouchStart = (key) => (keys.current[key] = true);
   const handleTouchEnd = (key) => (keys.current[key] = false);
 
   const triggerReload = () => {
@@ -85,11 +92,18 @@ export default function AliensShooter() {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
     const update = (time) => {
-      const s = state.current;
-      if (s.gameOver) {
-        setGameStatus("lose");
+      // ✅ FPS CAP LOGIC
+      if (!timeRef.current.lastFrameTime) timeRef.current.lastFrameTime = time;
+      const elapsed = time - timeRef.current.lastFrameTime;
+
+      if (elapsed < FRAME_INTERVAL) {
+        animationRef.current = requestAnimationFrame(update);
         return;
       }
+      timeRef.current.lastFrameTime = time - (elapsed % FRAME_INTERVAL);
+
+      const s = state.current;
+      if (s.gameOver) return;
 
       const difficulty = Math.min(s.score / 50, 1);
       const maxEnemies = INITIAL_MAX_ENEMIES + Math.floor(s.score / 10);
@@ -102,17 +116,14 @@ export default function AliensShooter() {
 
       // PLAYER FIRE
       if (keys.current[" "] && !isReloading && time - lastFireRef.current > FIRE_COOLDOWN) {
-        setAmmo(prev => {
-          if (prev > 0) {
-            s.bullets.push({ x: s.playerX + PLAYER_W / 2 - BULLET_SIZE / 2, y: HEIGHT - PLAYER_H - 10 });
-            lastFireRef.current = time;
-            const newAmmo = prev - 1;
-            setReloadProgress((newAmmo / MAX_AMMO) * 100);
-            if (newAmmo === 0) triggerReload();
-            return newAmmo;
-          }
-          return prev;
-        });
+        if (ammo > 0) {
+          s.bullets.push({ x: s.playerX + PLAYER_W / 2 - BULLET_SIZE / 2, y: HEIGHT - PLAYER_H - 10 });
+          lastFireRef.current = time;
+          const newAmmo = ammo - 1;
+          setAmmo(newAmmo);
+          setReloadProgress((newAmmo / MAX_AMMO) * 100);
+          if (newAmmo === 0) triggerReload();
+        }
       }
 
       // SPAWN ENEMIES
@@ -180,19 +191,14 @@ export default function AliensShooter() {
   useEffect(() => {
     startGameLoop();
     return () => cancelAnimationFrame(animationRef.current);
-  }, []);
+  }, [ammo, isReloading]); // تحديث اللوب عند تغير حالة الذخيرة لضمان دقة الإطلاق
 
   const reset = () => {
-    // 1. تصفير الـ Interval
     if (reloadIntervalRef.current) clearInterval(reloadIntervalRef.current);
-    
-    // 2. تصفير الحالات (States)
     setAmmo(MAX_AMMO);
     setIsReloading(false);
     setReloadProgress(100);
-    setGameStatus("playing");
-    
-    // 3. تصفير المراجع (Refs)
+    timeRef.current.lastFrameTime = 0;
     state.current = { 
       playerX: WIDTH / 2 - PLAYER_W / 2, 
       bullets: [], 
@@ -203,70 +209,52 @@ export default function AliensShooter() {
       score: 0, 
       gameOver: false 
     };
-    
-    // 4. إعادة تشغيل اللوب
     setRenderState({ ...state.current });
     startGameLoop();
   };
 
   return (
     <PageWrapper>
-      
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white p-4 select-none font-sans">
-        <h1 className="text-4xl font-black mb-4 tracking-tighter bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">Aliens Shooter</h1>
+        <h1 className="text-4xl font-black mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">Aliens Shooter</h1>
         
         <div className="flex flex-col items-center gap-2 mb-4">
           <div className="flex items-center gap-6 text-xl font-mono">
-             {/* SCORE (عرض ثابت) */}
-              <div className="w-[120px] text-left text-2xl text-pink-400">
+              <div className="w-[120px] text-left text-2xl text-pink-400 font-black">
                 Score: {renderState.score}
               </div>
 
-              {/* HEARTS */}
               <div className="flex gap-1 text-red-500 text-2xl">
               {[0, 1, 2].map((i) => (
-                <span
-                key={i}
-                className={`transition-all duration-300 ${
-                  i < renderState.lives ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                }`}
-              >
-                ❤
-              </span>
+                <span key={i} className={`transition-all duration-300 ${i < renderState.lives ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}>❤</span>
               ))}
             </div>
-
           </div>
 
           <div className="w-[200px] h-3 bg-white/10 rounded-full border border-white/20 overflow-hidden">
             <div 
               className={`h-full transition-all duration-75 ${isReloading ? 'bg-yellow-500 animate-pulse' : 'bg-cyan-400'}`} 
-              style={{ width: `${reloadProgress}% `}} 
+              style={{ width: `${reloadProgress}%` }} 
             />
           </div>
           <span className="text-xs font-bold text-cyan-200">{isReloading ? "RELOADING..." : `AMMO: ${ammo}/${MAX_AMMO}`}</span>
         </div>
 
         <div className="relative bg-black/60 border-2 border-cyan-400/20 rounded-xl overflow-hidden shadow-2xl" style={{ width: WIDTH, height: HEIGHT }}>
-          {/* PLAYER */}
           <div className="absolute bg-pink-500 rounded-t-lg shadow-[0_0_15px_#ec4899]" style={{ width: PLAYER_W, height: PLAYER_H, left: renderState.playerX, bottom: 10 }} />
 
-          {/* ENEMIES */}
           {renderState.enemies.map((e, i) => (
             <div key={i} className={`absolute rounded-lg shadow-lg ${e.hard ? "bg-red-600 shadow-red-900/50" : "bg-green-500 shadow-green-900/50"}`} style={{ width: ENEMY_SIZE, height: ENEMY_SIZE, left: e.x, top: e.y }} />
           ))}
 
-          {/* BULLETS */}
           {renderState.bullets.map((b, i) => (
             <div key={i} className="absolute bg-yellow-400 rounded-full" style={{ width: BULLET_SIZE, height: 15, left: b.x, top: b.y }} />
           ))}
 
-          {/* ENEMY BULLETS */}
           {renderState.enemyBullets.map((b, i) => (
             <div key={i} className="absolute bg-red-400 rounded-full" style={{ width: BULLET_SIZE, height: 12, left: b.x, top: b.y }} />
           ))}
 
-          {/* HEARTS */}
           {renderState.hearts.map((h, i) => (
             <div key={i} className="absolute text-2xl animate-bounce" style={{ left: h.x, top: h.y }}>❤</div>
           ))}
@@ -283,13 +271,12 @@ export default function AliensShooter() {
             </div>
           )}
         </div>
-                {/* MOBILE CONTROLS */}
+
         <div className="flex gap-4 mt-8 w-full max-w-[340px] h-20 md:hidden">
           <button onPointerDown={() => handleTouchStart("ArrowLeft")} onPointerUp={() => handleTouchEnd("ArrowLeft")} className="flex-1 bg-white/10 rounded-xl text-3xl active:bg-white/30 touch-none">⬅</button>
           <button onPointerDown={() => handleTouchStart("ArrowRight")} onPointerUp={() => handleTouchEnd("ArrowRight")} className="flex-1 bg-white/10 rounded-xl text-3xl active:bg-white/30 touch-none">➡</button>
           <button onPointerDown={() => handleTouchStart(" ")} onPointerUp={() => handleTouchEnd(" ")} className="flex-[1.5] bg-red-500/50 rounded-xl text-3xl active:bg-red-500/80 border-2 border-red-500/20 touch-none">🔥</button>
         </div>
-
       </div>
     </PageWrapper>
   );
