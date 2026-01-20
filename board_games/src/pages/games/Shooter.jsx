@@ -47,7 +47,7 @@ export default function Shooter() {
     ]);
 
     // 👇 cooldown أقل
-    setTimeout(() => setCanShoot(true), 100);
+    setTimeout(() => setCanShoot(true), 50);
   };
 
   /* ================= 🎹 CONTROLS ================= */
