@@ -2,7 +2,7 @@
   "name": "board_games",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://mohamed4-5.github.io/Games-Web/",
+  "homepage": "https://mohamed4-5.github.io/Arcadia/",
   "type": "module",
   "scripts": {
     "dev": "vite",

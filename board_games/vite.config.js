@@ -7,5 +7,5 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
-  base: "/Games-Web/",
+  base: "/Arcadia/",
 })
