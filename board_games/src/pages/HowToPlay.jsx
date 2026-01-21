@@ -6,7 +6,7 @@ export default function HowToPlay() {
   const [selectedGame, setSelectedGame] = useState(null);
 
   useEffect(() => {
-    fetch("/data/howToPlay.json")
+    fetch(`${import.meta.env.BASE_URL}data/howToPlay.json`)
       .then((res) => res.json())
       .then((data) => setGames(data.games))
       .catch((err) => console.error("Failed to load JSON:", err));

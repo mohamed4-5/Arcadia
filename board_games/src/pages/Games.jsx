@@ -8,10 +8,11 @@ export default function Games() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/data/games.json")
-      .then(res => res.json())
-      .then(data => setGames(data));
-  }, []);
+  fetch(`${import.meta.env.BASE_URL}data/games.json`)
+    .then(res => res.json())
+    .then(data => setGames(data))
+    .catch(err => console.error(err));
+}, []);
 
   return (
     <PageWrapper>
@@ -27,7 +28,7 @@ export default function Games() {
                 className="max-w-sm text-center bg-[#111827] rounded-2xl overflow-hidden border border-[#1f2937] shadow-lg hover:shadow-xl transition duration-300 hover:-translate-y-1 "
             >
                 <img
-                src={game.image}
+                src={`${import.meta.env.BASE_URL}${game.image}`}
                 className="w-full h-40 object-cover"
                 alt={game.name}
                 />

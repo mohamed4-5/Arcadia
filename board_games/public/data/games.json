@@ -2,49 +2,49 @@
   {
     "id": 1,
     "name": "XO",
-    "image": "../games/xo.png",
+    "image": "games/xo.png",
     "description": "A classic game based on quick thinking and direct competition"
   },
   {
     "id": 2,
     "name": "SUS",
-    "image": "../games/SUS.jpg",
+    "image": "games/SUS.jpg",
     "description": "A new strategic challenge with a different twist, the goal is to collect the word S-U-S more"
   },
   {
     "id": 3,
     "name": "Shooter",
-    "image": "../games/shooter.jpg",
+    "image": "games/shooter.jpg",
     "description": "2D Shooter game, shoot enemeis coming from left and right"
   },
   {
     "id": 4,
     "name": "Piano",
-    "image": "../games/piano.jpg",
+    "image": "games/piano.jpg",
     "description": "A classic game based on speed, hit the sqaures falling down on time "
   },
   {
     "id": 5,
     "name": "Whack Monsters",
-    "image": "../games/whackmonster.jpg",
+    "image": "games/whackmonster.jpg",
     "description": "A fast-paced, neon-style reaction game! Test your reflexes"
   },
   {
     "id": 6,
     "name": "Dodge Monsters",
-    "image": "../games/dodge.jpg",
+    "image": "games/dodge.jpg",
     "description": "Experience an adrenaline-pumping survival challenge! Navigate your ship"
   },
   {
     "id": 7,
     "name": "Aliens Shooter",
-    "image": "../games/aliensshooter.jpg",
+    "image": "games/aliensshooter.jpg",
     "description": "Who said that aliens are not exist! launch through endless waves of fiery Aliens"
   },
   {
     "id": 8,
     "name": "The Jumper",
-    "image": "../games/jumper.jpg",
+    "image": "games/jumper.jpg",
     "description": "Defy gravity and soar toward infinity! Jump across platforms in the most thrilling journey to the sky."
   }
 ]

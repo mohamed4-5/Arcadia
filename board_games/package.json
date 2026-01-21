@@ -2,13 +2,15 @@
   "name": "board_games",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://mohamed4-5.github.io/Games-Web/",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && npx gh-pages -d dist"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
