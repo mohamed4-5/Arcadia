@@ -1,0 +1,117 @@
+{
+  "games": [
+    {
+      "id": "xo",
+      "title": "XO",
+      "description": "Classic XO game. You can choose to play against the computer or a friend. X or O.",
+      "controls": [
+        "Click on an empty square."
+      ],
+      "goal": "Form a line of three squares.",
+      "tips": [
+        "Choose the game mode: against the computer or a friend.",
+        "Try to prevent your opponent from forming a complete line.",
+        "Focusing on the center squares gives an advantage."
+      ]
+    },
+    {
+      "id": "sus",
+      "title": "Sus",
+      "description": "A game similar to XO where one player has the letter S and the other has U.",
+      "controls": [
+        "Click on an empty square."
+      ],
+      "goal": "Try to collect sequences of SUS.",
+      "tips": [
+        "Choose the player or computer at the start.",
+        "Focus on preventing your opponent from collecting their points."
+      ]
+    },
+    {
+      "id": "piano",
+      "title": "Piano",
+      "description": "A game where you press the keys before they reach the bottom of the screen. Pressing the wrong place or reaching the ground makes you lose. Speed gradually increases with score.",
+      "controls": [
+        "A S K L",
+        "Press the tiles."
+      ],
+      "goal": "Try to survive as long as possible.",
+      "tips": [
+        "Focus on the falling keys.",
+        "Wrong press causes a life loss.",
+        "The speed increases as your score increases."
+      ]
+    },
+    {
+      "id": "dodge_monsters",
+      "title": "Dodge Monsters",
+      "description": "Avoid moving monsters for as long as possible. As your score increases, the monsters' speed increases.",
+      "controls": [
+        "⬅ ➡ to move"
+      ],
+      "goal": "Try to survive as long as possible.",
+      "tips": [
+        "Move quickly to avoid monsters.",
+        "Speed gradually increases with score.",
+        "Try to anticipate monster movements to dodge them easily."
+      ]
+    },
+    {
+      "id": "aliens_shooter",
+      "title": "Aliens Shooter",
+      "description": "Shoot the enemies coming from the top. There are different types of enemies. As your score increases, enemy speed and fire rate increase.",
+      "controls": [
+        "⬅ ➡ to move",
+        "SPACE / FIRE to shoot"
+      ],
+      "goal": "Try to survive as long as possible.",
+      "tips": [
+        "Keep an eye on ammo.",
+        "Strong enemies need two hits to defeat.",
+        "Try to avoid bullets coming from enemies."
+      ]
+    },
+    {
+      "id": "the_jumper",
+      "title": "The Jumper",
+      "description": "Control the character to jump on the blocks accurately. As your score increases, the blocks become smaller, the distance between them grows, and moving blocks speed up.",
+      "controls": [
+        "⬅ ➡ to move"
+      ],
+      "goal": "Try to climb as high as possible.",
+      "tips": [
+        "Focus on timing your jumps accurately.",
+        "With each score increase, expect changes in block size and movement.",
+        "Maintain balance to avoid falling."
+      ]
+    },
+    {
+      "id": "whack",
+      "title": "Whack Monsters",
+      "description": "Hit the good monsters to earn points, don't hit the evil ones!",
+      "controls": [
+        "Click on the monster when it appears"
+      ],
+      "goal": "Collect the highest score possible before losing all hearts.",
+      "tips": [
+        "Focus on the colors.",
+        "Don't hit the blue monsters.",
+        "The game speeds up over time."
+      ]
+    },
+    {
+      "id": "shooter",
+      "title": "Shooter",
+      "description": "Defend yourself and shoot enemies before they reach you.",
+      "controls": [
+        "⬅ ➡ to move",
+        "SPACE / FIRE to shoot"
+      ],
+      "goal": "Kill as many enemies as possible.",
+      "tips": [
+        "Don't shoot empty space.",
+        "Red enemies are stronger."
+      ]
+    }
+  ]
+}
