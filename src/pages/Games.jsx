@@ -1,4 +1,3 @@
-import XO from "./games/XO";
 import { useEffect, useState } from "react";
 import PageWrapper from "../PageWrapper";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +5,21 @@ import { useNavigate } from "react-router-dom";
 export default function Games() {
   const [games, setGames] = useState([]);
   const navigate = useNavigate();
+
+  // Map game names to route paths
+  const getGameRoute = (gameName) => {
+    const routeMap = {
+      "XO": "XO",
+      "SUS": "sus",
+      "Shooter": "shooter",
+      "Piano": "piano",
+      "Whack Monsters": "whack monsters",
+      "Dodge Monsters": "dodge monsters",
+      "Aliens Shooter": "aliens shooter",
+      "The Jumper": "the jumper"
+    };
+    return routeMap[gameName] || gameName.toLowerCase();
+  };
 
   useEffect(() => {
   fetch(`${import.meta.env.BASE_URL}data/games.json`)
@@ -41,7 +55,7 @@ export default function Games() {
                 </p>
 
                 <button className="mt-4 w-full py-2 rounded-xl bg-purple-600 hover:bg-transparent hover:border hover:border-purple-600 cursor-pointer transition duration-300 text-white"
-                onClick={()=> navigate(`/${game.name}`)}>
+                onClick={()=> navigate(`/${getGameRoute(game.name)}`)}>
                     Start Game
                 </button>
                 </div>

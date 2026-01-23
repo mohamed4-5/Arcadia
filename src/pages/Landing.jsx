@@ -24,7 +24,6 @@ export default function Landing() {
         Enter Games
     </button>
     <button onClick={()=> navigate("/how-to-play")}
-      to="/how-to-play"
       className="text-slate-500 hover:text-white text-lg transition underline decoration-slate-700 underline-offset-4"
     >
       How To Play
