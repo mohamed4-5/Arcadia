@@ -15,8 +15,22 @@
       ]
     },
     {
+    "id": "misere",
+      "title": "Misère XO",
+      "description": "The classic XO game, but things are reversed. You can choose to play against the computer or a friend. X or O.",
+      "controls": [
+        "Click on an empty square."
+      ],
+      "goal": "Avoid forming a line of three squares.",
+      "tips": [
+        "Choose the game mode: against the computer or a friend.",
+        "Try to force your opponent to form a complete line.",
+        "Focusing on the edge squares gives an advantage."
+      ]
+    },
+    {
       "id": "sus",
-      "title": "Sus",
+      "title": "SUS",
       "description": "A game similar to XO where one player has the letter S and the other has U.",
       "controls": [
         "Click on an empty square."
@@ -47,7 +61,7 @@
       "title": "Dodge Monsters",
       "description": "Avoid moving monsters for as long as possible. As your score increases, the monsters' speed increases.",
       "controls": [
-        "⬅ ➡ to move"
+        "← → to move"
       ],
       "goal": "Try to survive as long as possible.",
       "tips": [
@@ -61,8 +75,8 @@
       "title": "Aliens Shooter",
       "description": "Shoot the enemies coming from the top. There are different types of enemies. As your score increases, enemy speed and fire rate increase.",
       "controls": [
-        "⬅ ➡ to move",
-        "SPACE / FIRE to shoot"
+        "← → to move",
+        "SPACE / 🔥 to shoot"
       ],
       "goal": "Try to survive as long as possible.",
       "tips": [
@@ -76,7 +90,7 @@
       "title": "The Jumper",
       "description": "Control the character to jump on the blocks accurately. As your score increases, the blocks become smaller, the distance between them grows, and moving blocks speed up.",
       "controls": [
-        "⬅ ➡ to move"
+        "← → to move"
       ],
       "goal": "Try to climb as high as possible.",
       "tips": [
@@ -104,8 +118,8 @@
       "title": "Shooter",
       "description": "Defend yourself and shoot enemies before they reach you.",
       "controls": [
-        "⬅ ➡ to move",
-        "SPACE / FIRE to shoot"
+        "← → to move",
+        "SPACE / 🔥 to shoot"
       ],
       "goal": "Kill as many enemies as possible.",
       "tips": [
